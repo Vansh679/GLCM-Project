@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h3 class="mb-0">Upload Image</h3>
+    </div>
+    <div class="card-body">
+        <form method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <input type="file" class="form-control" name="file" accept="image/*">
+            </div>
+            <button type="submit" class="btn btn-success">Analyze Texture</button>
+        </form>
+    </div>
+</div>
+
+{% if original %}
+<div class="card mb-4">
+    <div class="card-header bg-info text-white">
+        <h3 class="mb-0">Analysis Results</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <img src="{{ url_for('static', filename='uploads/' + original) }}" 
+                         class="card-img-top" alt="Original Image">
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <ul class="nav nav-tabs" id="resultsTab" role="tablist">
+                    {% for direction in results %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {% if loop.first %}active{% endif %}" 
+                                data-bs-toggle="tab" 
+                                data-bs-target="#{{ direction|replace(' ', '') }}" 
+                                type="button">
+                            {{ direction }}
+                        </button>
+                    </li>
+                    {% endfor %}
+                </ul>
+                
+                <div class="tab-content mt-3">
+                    {% for direction, data in results.items() %}
+                    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" 
+                         id="{{ direction|replace(' ', '') }}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">Features</div>
+                                    <div class="card-body">
+                                        <table class="table table-striped">
+                                            {% for name, value in data.features.items() %}
+                                            <tr>
+                                                <td>{{ name|title }}</td>
+                                                <td>{{ "%.4f"|format(value) }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card mb-3">
+                                    <img src="{{ data.heatmap }}" class="card-img-top" alt="Heatmap">
+                                </div>
+                                <div class="card">
+                                    <img src="{{ data.surface }}" class="card-img-top" alt="3D Surface">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
